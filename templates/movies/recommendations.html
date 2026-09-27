@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendations - Lab05</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #111111;
+            color: #FFFFFF;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        header {
+            background-color: #E50914;
+            padding: 20px 40px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        header h1 {
+            font-size: 2.5rem;
+            color: #FFFFFF;
+            letter-spacing: 2px;
+        }
+        header h1 span {
+            color: #E50914;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .genre-section {
+            margin-bottom: 40px;
+        }
+        .genre-section h2 {
+            color: #E50914;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #E50914;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .genre-section h2 .avg-rating {
+            color: #CCCCCC;
+            font-size: 1rem;
+            font-weight: normal;
+            margin-left: 10px;
+        }
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .movie-card {
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.3);
+            border-color: #E50914;
+        }
+        .movie-card img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            background-color: #333333;
+        }
+        .movie-info {
+            padding: 15px;
+        }
+        .movie-info h3 {
+            color: #FFFFFF;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        .movie-info .meta {
+            color: #CCCCCC;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .movie-info .rating {
+            color: #E50914;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .movie-info .synopsis {
+            color: #999999;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        footer {
+            background-color: #000000;
+            text-align: center;
+            padding: 20px;
+            color: #666666;
+            font-size: 0.85rem;
+            margin-top: 40px;
+        }
+        footer span {
+            color: #E50914;
+        }
+        .no-movies {
+            color: #CCCCCC;
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎬 <span>Movie</span> Recommendations</h1>
+        <p style="color: #CCCCCC; margin-top: 10px;">Best rated movies organized by genre</p>
+    </header>
+
+    <div class="container">
+        {% for genre in genres %}
+        <div class="genre-section">
+            <h2>
+                {{ genre.name }}
+                {% if genre.avg_rating %}
+                <span class="avg-rating">★ {{ genre.avg_rating|floatformat:2 }}</span>
+                {% endif %}
+            </h2>
+            {% if recommendations[genre] %}
+            <div class="movie-grid">
+                {% for movie in recommendations[genre] %}
+                <div class="movie-card">
+                    {% if movie.cover_image %}
+                    <img src="{{ movie.cover_image.url }}" alt="{{ movie.title }}">
+                    {% else %}
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwiIGhlaWdodD0iNDAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iNDAwIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iMTQwIiB5PSIyMDAiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk1vdmllPC90ZXh0Pjwvc3ZnPg==" alt="{{ movie.title }}">
+                    {% endif %}
+                    <div class="movie-info">
+                        <h3>{{ movie.title }}</h3>
+                        <p class="meta">Released: {{ movie.release_year }} | Director: {{ movie.director }}</p>
+                        {% if movie.avg_score %}
+                        <p class="rating">★ {{ movie.avg_score|floatformat:1 }}/5</p>
+                        {% else %}
+                        <p class="rating">No ratings yet</p>
+                        {% endif %}
+                        <p class="synopsis">{{ movie.synopsis }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="no-movies">No recommendations available for this genre yet.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <footer>
+        <p>Made with <span>♥</span> | Laboratorio 05 - Desarrollo de Aplicaciones Empresariales</p>
+    </footer>
+</body>
+</html>
