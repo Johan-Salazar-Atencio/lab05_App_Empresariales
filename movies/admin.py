@@ -2,10 +2,19 @@ from django.contrib import admin
 from .models import Genre, Person, Movie, Rating
 
 
+class RatingInline(admin.TabularInline):
+    model = Rating
+    extra = 1
+    fields = ['user_name', 'score', 'comment']
+    min_num = 0
+    max_num = 5
+
+
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'created_at']
     search_fields = ['name']
+    list_filter = ['created_at']
 
 
 @admin.register(Person)
@@ -21,11 +30,13 @@ class MovieAdmin(admin.ModelAdmin):
     list_filter = ['genre', 'release_year']
     search_fields = ['title']
     readonly_fields = ['created_at', 'updated_at']
+    inlines = [RatingInline]
 
     def get_main_genre(self, obj):
         genre = obj.genre.first()
         return genre.name if genre else '-'
     get_main_genre.short_description = 'Main Genre'
+    get_main_genre.admin_order_field = 'genre__name'
 
     def get_director_names(self, obj):
         if obj.director:
@@ -33,12 +44,24 @@ class MovieAdmin(admin.ModelAdmin):
         return '-'
     get_director_names.short_description = 'Director'
 
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        try:
+            from django.db.models import Q
+            queryset |= self.get_queryset(request).filter(
+                Q(director__first_name__icontains=search_term) |
+                Q(director__last_name__icontains=search_term)
+            )
+        except Exception:
+            pass
+        return queryset, use_distinct
+
     def has_delete_permission(self, request, obj=None):
         return True
 
 
 @admin.register(Rating)
 class RatingAdmin(admin.ModelAdmin):
-    list_display = ['movie', 'user_name', 'score', 'created_at']
+    list_display = ['movie', 'user_name', 'score', 'comment', 'created_at']
     list_filter = ['score', 'movie']
     search_fields = ['movie__title', 'user_name']
