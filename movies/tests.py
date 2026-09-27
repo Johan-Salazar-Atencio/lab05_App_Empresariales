@@ -193,33 +193,33 @@ class PublicViewTest(TestCase):
             comment='Excellent',
         )
 
-    def test_recommendations_url(self):
-        url = reverse('movies:recommendations')
-        self.assertEqual(url, '/recommendations/')
+    def test_movie_list_url(self):
+        url = reverse('movies:movie_list')
+        self.assertEqual(url, '/')
 
     def test_recommendations_view_status(self):
         client = Client()
-        response = client.get(reverse('movies:recommendations'))
+        response = client.get(reverse('movies:movie_list'))
         self.assertEqual(response.status_code, 200)
 
-    def test_recommendations_template(self):
+    def test_movie_list_template(self):
         client = Client()
-        response = client.get(reverse('movies:recommendations'))
-        self.assertTemplateUsed(response, 'movies/recommendations.html')
+        response = client.get(reverse('movies:movie_list'))
+        self.assertTemplateUsed(response, 'movies/movie_list.html')
 
     def test_recommendations_contains_movies(self):
         client = Client()
-        response = client.get(reverse('movies:recommendations'))
+        response = client.get(reverse('movies:movie_list'))
         self.assertContains(response, 'Inception')
 
     def test_recommendations_has_genres(self):
         client = Client()
-        response = client.get(reverse('movies:recommendations'))
+        response = client.get(reverse('movies:movie_list'))
         self.assertContains(response, 'Action')
 
     def test_recommendations_context_data(self):
         client = Client()
-        response = client.get(reverse('movies:recommendations'))
+        response = client.get(reverse('movies:movie_list'))
         self.assertIn('genre_data', response.context)
         self.assertGreater(len(response.context['genre_data']), 0)
         first_entry = response.context['genre_data'][0]
