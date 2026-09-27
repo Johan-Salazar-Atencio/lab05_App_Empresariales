@@ -26,7 +26,8 @@ build/
 .idea/
 node_modules/
 staticfiles/
-media/
 *.bak
 *.orig
 *.rej
+*.user+
+*.iml

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Q
 from .models import Genre, Person, Movie, Rating
 
 
@@ -8,6 +9,7 @@ class RatingInline(admin.TabularInline):
     fields = ['user_name', 'score', 'comment']
     min_num = 0
     max_num = 5
+    show_change_link = True
 
 
 @admin.register(Genre)
@@ -36,7 +38,6 @@ class MovieAdmin(admin.ModelAdmin):
         genre = obj.genre.first()
         return genre.name if genre else '-'
     get_main_genre.short_description = 'Main Genre'
-    get_main_genre.admin_order_field = 'genre__name'
 
     def get_director_names(self, obj):
         if obj.director:
@@ -46,14 +47,10 @@ class MovieAdmin(admin.ModelAdmin):
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
-        try:
-            from django.db.models import Q
-            queryset |= self.get_queryset(request).filter(
-                Q(director__first_name__icontains=search_term) |
-                Q(director__last_name__icontains=search_term)
-            )
-        except Exception:
-            pass
+        queryset |= self.get_queryset(request).filter(
+            Q(director__first_name__icontains=search_term) |
+            Q(director__last_name__icontains=search_term)
+        )
         return queryset, use_distinct
 
     def has_delete_permission(self, request, obj=None):
