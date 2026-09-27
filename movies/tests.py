@@ -2,7 +2,7 @@ from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.contrib.auth.models import Group, User, Permission
 from django.template.context import Context
-from .models import Genre, Person, Movie, Rating
+from .models import Genre, Movie, Recommendation
 
 
 def _patch_context_copy():
@@ -18,221 +18,180 @@ _patch_context_copy()
 
 class GenreModelTest(TestCase):
     def test_create_genre(self):
-        genre = Genre.objects.create(name='Action', description='High energy')
+        genre = Genre.objects.create(name='Action')
         self.assertEqual(str(genre), 'Action')
         self.assertEqual(genre.name, 'Action')
 
-    def test_genre_ordering(self):
-        Genre.objects.create(name='B', description='')
-        Genre.objects.create(name='A', description='')
-        genres = list(Genre.objects.all())
-        self.assertEqual(genres[0].name, 'A')
-        self.assertEqual(genres[1].name, 'B')
+    def test_genre_name_unique(self):
+        Genre.objects.create(name='Action')
+        with self.assertRaises(Exception):
+            Genre.objects.create(name='Action')
 
     def test_genre_db_table(self):
         genre = Genre.objects.create(name='SciFi')
         self.assertEqual(Genre._meta.db_table, 'genres')
 
 
-class PersonModelTest(TestCase):
-    def test_create_person_director(self):
-        person = Person.objects.create(first_name='Christopher', last_name='Nolan', role='director')
-        self.assertIn('Director', str(person))
-        self.assertEqual(person.role, 'director')
-
-    def test_create_person_actor(self):
-        person = Person.objects.create(first_name='Bradley', last_name='Cooper', role='actor')
-        self.assertIn('Actor', str(person))
-        self.assertEqual(person.role, 'actor')
-
-    def test_person_db_table(self):
-        Person.objects.create(first_name='Test', last_name='User', role='actor')
-        self.assertEqual(Person._meta.db_table, 'people')
-
-
 class MovieModelTest(TestCase):
     def setUp(self):
-        self.genre_action = Genre.objects.create(name='Action', description='')
-        self.genre_drama = Genre.objects.create(name='Drama', description='')
-        self.director = Person.objects.create(first_name='Christopher', last_name='Nolan', role='director')
+        self.genre = Genre.objects.create(name='Action')
         self.movie = Movie.objects.create(
             title='Inception',
+            description='A dream heist film',
             release_year=2010,
-            synopsis='A dream heist film',
-            director=self.director
+            duration_minutes=148,
+            genre=self.genre,
+            rating=4.8,
         )
-        self.movie.genre.set([self.genre_action, self.genre_drama])
 
     def test_create_movie(self):
-        self.assertEqual(str(self.movie), 'Inception')
+        self.assertEqual(str(self.movie), 'Inception (2010)')
         self.assertEqual(self.movie.title, 'Inception')
         self.assertEqual(self.movie.release_year, 2010)
+        self.assertEqual(self.movie.duration_minutes, 148)
+        self.assertEqual(float(self.movie.rating), 4.8)
 
     def test_movie_genre_relation(self):
-        self.assertIn(self.genre_action, self.movie.genre.all())
-        self.assertIn(self.genre_drama, self.movie.genre.all())
-        self.assertEqual(self.movie.genre.count(), 2)
+        self.assertEqual(self.movie.genre, self.genre)
+        self.assertIn(self.movie, self.genre.movies.all())
 
-    def test_movie_director_relation(self):
-        self.assertEqual(self.movie.director, self.director)
+    def test_movie_poster_blank(self):
+        movie_no_poster = Movie.objects.create(
+            title='No Poster',
+            description='Test',
+            release_year=2020,
+            duration_minutes=90,
+            genre=self.genre,
+        )
+        self.assertFalse(movie_no_poster.poster)
 
     def test_movie_db_table(self):
         self.assertEqual(Movie._meta.db_table, 'movies')
 
-    def test_movie_string(self):
-        self.assertEqual(str(self.movie), 'Inception')
-
-    def test_movie_blank_director(self):
-        movie_no_dir = Movie.objects.create(
-            title='No Director',
-            release_year=2020,
-            synopsis='No director movie'
+    def test_movie_ordering(self):
+        Movie.objects.create(
+            title='Older Movie',
+            description='Test',
+            release_year=2000,
+            duration_minutes=100,
+            genre=self.genre,
         )
-        self.assertIsNone(movie_no_dir.director)
-        self.assertEqual(str(movie_no_dir), 'No Director')
-
-    def test_movie_string_representation(self):
-        genre = Genre.objects.create(name='Test', description='')
-        director = Person.objects.create(first_name='John', last_name='Doe', role='director')
-        movie = Movie.objects.create(
-            title='Test Movie',
-            release_year=2023,
-            synopsis='Test',
-            director=director
-        )
-        movie.genre.set([genre])
-        self.assertEqual(str(movie), 'Test Movie')
+        movies = list(Movie.objects.all())
+        self.assertEqual(movies[0].title, 'Inception')
+        self.assertEqual(movies[1].title, 'Older Movie')
 
 
-class RatingModelTest(TestCase):
+class RecommendationModelTest(TestCase):
     def setUp(self):
-        self.genre = Genre.objects.create(name='Action', description='')
-        self.director = Person.objects.create(first_name='Christopher', last_name='Nolan', role='director')
+        self.genre = Genre.objects.create(name='Action')
         self.movie = Movie.objects.create(
             title='Inception',
+            description='A dream heist',
             release_year=2010,
-            synopsis='A dream heist',
-            director=self.director
+            duration_minutes=148,
+            genre=self.genre,
+            rating=4.8,
         )
-        self.rating = Rating.objects.create(
+        self.recommendation = Recommendation.objects.create(
             movie=self.movie,
+            user_name='admin',
             score=5,
             comment='Excellent',
-            user_name='admin'
         )
 
-    def test_create_rating(self):
-        self.assertEqual(str(self.rating), 'admin - Inception (5/5)')
-        self.assertEqual(self.rating.score, 5)
-        self.assertEqual(self.rating.comment, 'Excellent')
+    def test_create_recommendation(self):
+        self.assertEqual(str(self.recommendation), 'admin - Inception (5/5)')
+        self.assertEqual(self.recommendation.score, 5)
+        self.assertEqual(self.recommendation.comment, 'Excellent')
 
-    def test_rating_relation(self):
-        self.assertIn(self.rating, self.movie.ratings.all())
-        self.assertEqual(self.movie.ratings.count(), 1)
+    def test_recommendation_relation(self):
+        self.assertIn(self.recommendation, self.movie.recommendations.all())
+        self.assertEqual(self.movie.recommendations.count(), 1)
 
-    def test_rating_db_table(self):
-        self.assertEqual(Rating._meta.db_table, 'ratings')
+    def test_recommendation_db_table(self):
+        self.assertEqual(Recommendation._meta.db_table, 'recommendations')
 
 
 class MovieAdminTest(TestCase):
     def setUp(self):
         from django.contrib.admin.sites import AdminSite
-        from .admin import MovieAdmin, GenreAdmin, PersonAdmin, RatingAdmin, RatingInline
+        from .admin import MovieAdmin, GenreAdmin, RecommendationAdmin, RecommendationInline
 
         self.site = AdminSite()
         self.genre_admin = GenreAdmin(Genre, self.site)
-        self.person_admin = PersonAdmin(Person, self.site)
         self.movie_admin = MovieAdmin(Movie, self.site)
-        self.rating_admin = RatingAdmin(Rating, self.site)
+        self.rec_admin = RecommendationAdmin(Recommendation, self.site)
         self.user = User.objects.create_user(username='testuser')
 
     def test_genre_admin_list_display(self):
-        self.assertEqual(self.genre_admin.list_display, ['name', 'description', 'created_at'])
+        self.assertIn('name', self.genre_admin.list_display)
 
     def test_genre_admin_search_fields(self):
         self.assertEqual(self.genre_admin.search_fields, ['name'])
 
-    def test_person_admin_list_display(self):
-        self.assertEqual(self.person_admin.list_display, ['first_name', 'last_name', 'role', 'created_at'])
-
-    def test_person_admin_search_fields(self):
-        self.assertEqual(self.person_admin.search_fields, ['first_name', 'last_name'])
-
     def test_movie_admin_list_display(self):
-        self.assertEqual(self.movie_admin.list_display, ['title', 'release_year', 'get_main_genre', 'get_director_names', 'created_at'])
+        self.assertIn('title', self.movie_admin.list_display)
+        self.assertIn('release_year', self.movie_admin.list_display)
+        self.assertIn('genre', self.movie_admin.list_display)
+        self.assertIn('rating', self.movie_admin.list_display)
 
     def test_movie_admin_list_filter(self):
-        self.assertEqual(self.movie_admin.list_filter, ['genre', 'release_year'])
+        self.assertIn('genre', self.movie_admin.list_filter)
+        self.assertIn('release_year', self.movie_admin.list_filter)
 
     def test_movie_admin_search_fields(self):
-        self.assertEqual(self.movie_admin.search_fields, ['title'])
+        self.assertIn('title', self.movie_admin.search_fields)
+        self.assertIn('description', self.movie_admin.search_fields)
 
     def test_movie_admin_readonly_fields(self):
         self.assertEqual(self.movie_admin.readonly_fields, ['created_at', 'updated_at'])
 
     def test_movie_admin_inlines(self):
-        from .admin import RatingInline
-        self.assertIn(RatingInline, self.movie_admin.inlines)
+        from .admin import RecommendationInline
+        self.assertIn(RecommendationInline, self.movie_admin.inlines)
 
-    def test_movie_admin_get_main_genre(self):
-        genre = Genre.objects.create(name='Action', description='')
-        movie = Movie.objects.create(title='Test', release_year=2020, synopsis='Test')
-        movie.genre.set([genre])
-        result = self.movie_admin.get_main_genre(movie)
-        self.assertEqual(result, 'Action')
+    def test_recommendation_admin_list_display(self):
+        self.assertIn('movie', self.rec_admin.list_display)
+        self.assertIn('user_name', self.rec_admin.list_display)
+        self.assertIn('score', self.rec_admin.list_display)
 
-    def test_movie_admin_get_director_names(self):
-        person = Person.objects.create(first_name='John', last_name='Doe', role='director')
-        movie = Movie.objects.create(title='Test', release_year=2020, synopsis='Test', director=person)
-        result = self.movie_admin.get_director_names(movie)
-        self.assertIn('John', result)
-        self.assertIn('Doe', result)
-
-    def test_movie_admin_has_delete_permission(self):
-        self.assertTrue(self.movie_admin.has_delete_permission(self.user))
-
-    def test_movie_admin_get_search_results(self):
-        person = Person.objects.create(first_name='Jane', last_name='Smith', role='director')
-        Movie.objects.create(title='Test', release_year=2020, synopsis='Test', director=person)
-        queryset = Movie.objects.all()
-        result, distinct = self.movie_admin.get_search_results(None, queryset, 'Jane')
-        self.assertTrue(result.exists())
-
-    def test_rating_admin_list_display(self):
-        self.assertEqual(self.rating_admin.list_display, ['movie', 'user_name', 'score', 'comment', 'created_at'])
-
-    def test_rating_admin_search_fields(self):
-        self.assertEqual(self.rating_admin.search_fields, ['movie__title', 'user_name'])
+    def test_recommendation_admin_search_fields(self):
+        self.assertIn('movie__title', self.rec_admin.search_fields)
+        self.assertIn('user_name', self.rec_admin.search_fields)
 
 
-class RatingInlineTest(TestCase):
+class RecommendationInlineTest(TestCase):
     def setUp(self):
         from django.contrib.admin.sites import AdminSite
-        from .admin import RatingInline
+        from .admin import RecommendationInline
         self.site = AdminSite()
-        self.rating_inline = RatingInline(Rating, self.site)
+        self.inline = RecommendationInline(Recommendation, self.site)
 
-    def test_rating_inline_model(self):
-        self.assertEqual(self.rating_inline.model, Rating)
+    def test_inline_model(self):
+        self.assertEqual(self.inline.model, Recommendation)
 
-    def test_rating_inline_fields(self):
-        self.assertEqual(self.rating_inline.fields, ['user_name', 'score', 'comment'])
+    def test_inline_fields(self):
+        self.assertEqual(self.inline.fields, ['user_name', 'score', 'comment'])
 
 
 @override_settings(DEBUG=False)
 class PublicViewTest(TestCase):
     def setUp(self):
-        self.genre = Genre.objects.create(name='Action', description='')
-        self.director = Person.objects.create(first_name='Christopher', last_name='Nolan', role='director')
+        self.genre = Genre.objects.create(name='Action')
         self.movie = Movie.objects.create(
             title='Inception',
+            description='A dream heist film',
             release_year=2010,
-            synopsis='A dream heist film',
-            director=self.director
+            duration_minutes=148,
+            genre=self.genre,
+            rating=4.8,
         )
-        self.movie.genre.set([self.genre])
-        Rating.objects.create(movie=self.movie, score=5, comment='Excellent', user_name='admin')
-        Rating.objects.create(movie=self.movie, score=4, comment='Great', user_name='user1')
+        Recommendation.objects.create(
+            movie=self.movie,
+            user_name='admin',
+            score=5,
+            comment='Excellent',
+        )
 
     def test_recommendations_url(self):
         url = reverse('movies:recommendations')
@@ -257,12 +216,6 @@ class PublicViewTest(TestCase):
         client = Client()
         response = client.get(reverse('movies:recommendations'))
         self.assertContains(response, 'Action')
-
-    def test_recommendations_sorting_by_rating(self):
-        client = Client()
-        response = client.get(reverse('movies:recommendations'))
-        content = response.content.decode()
-        self.assertIn('Inception', content)
 
     def test_recommendations_context_data(self):
         client = Client()

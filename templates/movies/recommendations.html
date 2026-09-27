@@ -44,12 +44,6 @@
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
-        .genre-section h2 .avg-rating {
-            color: #CCCCCC;
-            font-size: 1rem;
-            font-weight: normal;
-            margin-left: 10px;
-        }
         .movie-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -91,7 +85,7 @@
             font-size: 1.2rem;
             font-weight: bold;
         }
-        .movie-info .synopsis {
+        .movie-info .description {
             color: #999999;
             font-size: 0.85rem;
             margin-top: 8px;
@@ -139,30 +133,21 @@
     <div class="container">
         {% for entry in genre_data %}
         <div class="genre-section">
-            <h2>
-                {{ entry.genre.name }}
-                {% if entry.genre.avg_rating %}
-                <span class="avg-rating">&#9733; {{ entry.genre.avg_rating|floatformat:2 }}</span>
-                {% endif %}
-            </h2>
+            <h2>{{ entry.genre.name }}</h2>
             {% if entry.movies %}
             <div class="movie-grid">
                 {% for movie in entry.movies %}
                 <div class="movie-card">
-                    {% if movie.cover_image %}
-                    <img src="{{ movie.cover_image.url }}" alt="{{ movie.title }}">
+                    {% if movie.poster %}
+                    <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
                     {% else %}
                     <div class="cover-placeholder">&#127916;</div>
                     {% endif %}
                     <div class="movie-info">
                         <h3>{{ movie.title }}</h3>
-                        <p class="meta">Released: {{ movie.release_year }} | Director: {{ movie.director }}</p>
-                        {% if movie.avg_score %}
-                        <p class="rating">&#9733; {{ movie.avg_score|floatformat:1 }}/5</p>
-                        {% else %}
-                        <p class="rating">No ratings yet</p>
-                        {% endif %}
-                        <p class="synopsis">{{ movie.synopsis }}</p>
+                        <p class="meta">{{ movie.release_year }} | {{ movie.duration_minutes }} min</p>
+                        <p class="rating">&#9733; {{ movie.rating|floatformat:1 }}/5</p>
+                        <p class="description">{{ movie.description }}</p>
                     </div>
                 </div>
                 {% endfor %}
