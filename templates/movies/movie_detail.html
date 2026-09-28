@@ -1,0 +1,186 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}{{ movie.title }}{% endblock %}
+
+{% block content %}
+<style>
+    .movie-detail {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    .movie-poster {
+        flex-shrink: 0;
+    }
+    .movie-poster img {
+        width: 300px;
+        height: 450px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .movie-poster .cover-placeholder {
+        width: 300px;
+        height: 450px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #333333;
+        color: #555555;
+        font-size: 5rem;
+        border-radius: 8px;
+    }
+    .movie-info {
+        flex: 1;
+        min-width: 300px;
+    }
+    .movie-info h2 {
+        color: #FFFFFF;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    .movie-info .genre-badge {
+        display: inline-block;
+        background-color: #e50914;
+        color: #FFFFFF;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+    }
+    .movie-info .details {
+        color: #CCCCCC;
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+    .movie-info .rating-large {
+        color: #e50914;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 15px 0;
+    }
+    .movie-info .description {
+        color: #999999;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-top: 15px;
+    }
+    .movie-actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+    .recommendations-section {
+        margin-top: 40px;
+    }
+    .recommendations-section h3 {
+        color: #e50914;
+        font-size: 1.3rem;
+        border-bottom: 2px solid #e50914;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    .recommendation-item {
+        background-color: #1a1a1a;
+        border: 1px solid #333333;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+    .recommendation-item .user {
+        color: #FFFFFF;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .recommendation-item .score {
+        color: #e50914;
+        margin-left: 10px;
+    }
+    .recommendation-item .comment {
+        color: #999999;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    .recommendation-form {
+        background-color: #1a1a1a;
+        border: 1px solid #333333;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .recommendation-form h4 {
+        color: #FFFFFF;
+        margin-bottom: 15px;
+    }
+    .back-link {
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+    .no-recommendations {
+        color: #666666;
+        font-style: italic;
+    }
+</style>
+
+<a href="{% url 'movies:movie_list' %}" class="btn btn-secondary back-link">&larr; Volver al Catalogo</a>
+
+<div class="movie-detail">
+    <div class="movie-poster">
+        {% if movie.poster %}
+        <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
+        {% else %}
+        <div class="cover-placeholder">&#127916;</div>
+        {% endif %}
+    </div>
+    <div class="movie-info">
+        <h2>{{ movie.title }}</h2>
+        <span class="genre-badge">{{ movie.genre.name }}</span>
+        <p class="details">Ano: {{ movie.release_year }}</p>
+        <p class="details">Duracion: {{ movie.duration_minutes }} minutos</p>
+        <p class="rating-large">&#9733; {{ movie.rating }}/5</p>
+        <p class="description">{{ movie.description }}</p>
+        <div class="movie-actions">
+            <a href="{% url 'movies:movie_update' movie.pk %}" class="btn">Editar</a>
+            <a href="{% url 'movies:movie_delete' movie.pk %}" class="btn btn-danger">Eliminar</a>
+        </div>
+    </div>
+</div>
+
+<div class="recommendations-section">
+    <h3>Recomendaciones ({{ recommendations|length }})</h3>
+
+    {% if recommendations %}
+    {% for rec in recommendations %}
+    <div class="recommendation-item">
+        <span class="user">{{ rec.user_name }}</span>
+        <span class="score">&#9733; {{ rec.score }}/5</span>
+        <p class="comment">{{ rec.comment }}</p>
+        <small style="color: #666666;">{{ rec.created_at|date:"d/m/Y H:i" }}</small>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="no-recommendations">Aun no hay recomendaciones para esta pelicula.</p>
+    {% endif %}
+
+    <div class="recommendation-form">
+        <h4>Agregar Recomendacion</h4>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_user_name">Tu nombre:</label>
+                {{ form.user_name }}
+            </div>
+            <div class="form-group">
+                <label for="id_score">Puntuacion (1-5):</label>
+                {{ form.score }}
+            </div>
+            <div class="form-group">
+                <label for="id_comment">Comentario:</label>
+                {{ form.comment }}
+            </div>
+            <button type="submit" class="btn">Enviar Recomendacion</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -3,73 +3,75 @@ from movies.models import Genre, Movie, Recommendation
 
 
 class Command(BaseCommand):
-    help = 'Seed the database with initial genres, movies, and recommendations'
+    help = 'Seed the database with initial genres, movies, and recommendations in Spanish'
 
     def handle(self, *args, **kwargs):
         self.seed_genres()
         self.seed_movies()
         self.seed_recommendations()
-        self.stdout.write(self.style.SUCCESS('Database seeded successfully!'))
+        self.stdout.write(self.style.SUCCESS('Base de datos poblada con exito!'))
 
     def seed_genres(self):
-        genres_data = [
-            'Action',
-            'Science Fiction',
-            'Drama',
-            'Thriller',
-        ]
-        for name in genres_data:
-            genre, created = Genre.objects.get_or_create(name=name)
-            if created:
-                self.stdout.write(f'Created genre: {genre.name}')
+        genre_mapping = {
+            'Action': 'Accion',
+            'Science Fiction': 'Ciencia Ficcion',
+            'Drama': 'Drama',
+            'Thriller': 'Suspenso',
+        }
+        for old_name, new_name in genre_mapping.items():
+            genre, created = Genre.objects.get_or_create(name=old_name)
+            if genre.name != new_name:
+                genre.name = new_name
+                genre.save()
+                self.stdout.write(f'Genero actualizado: {old_name} -> {new_name}')
+            elif created:
+                self.stdout.write(f'Genero creado: {new_name}')
 
     def seed_movies(self):
-        genres = {g.name: g for g in Genre.objects.all()}
-
         movies_data = [
             {
-                'title': 'Inception',
-                'description': 'A thief who steals corporate secrets through dream-sharing technology is given the task of planting an idea.',
+                'title': 'El Origen',
+                'description': 'Un ladron que roba secretos corporativos a traves de la tecnologia de compartir sueños recibe la tarea de plantar una idea en la mente de un CEO.',
                 'release_year': 2010,
                 'duration_minutes': 148,
-                'genre': 'Action',
+                'genre': 'Accion',
                 'rating': 4.8,
             },
             {
                 'title': 'Interstellar',
-                'description': 'A team of explorers travel through a wormhole in space to ensure humanity\'s survival.',
+                'description': 'Un equipo de exploradores viaja a traves de un agujero de gusano en el espacio para garantizar la supervivencia de la humanidad.',
                 'release_year': 2014,
                 'duration_minutes': 169,
-                'genre': 'Science Fiction',
+                'genre': 'Ciencia Ficcion',
                 'rating': 4.9,
             },
             {
-                'title': 'The Dark Knight',
-                'description': 'When the menace known as the Joker wreaks havoc on Gotham, Batman must accept one of the greatest psychological and physical tests.',
+                'title': 'El Caballero de la Noche',
+                'description': 'Cuando el Joker caos en Gotham, Batman debe aceptar una de las mayores pruebas psicologicas y fisicas de su capacidad para luchar contra la injusticia.',
                 'release_year': 2008,
                 'duration_minutes': 152,
-                'genre': 'Action',
+                'genre': 'Accion',
                 'rating': 4.9,
             },
             {
-                'title': 'Gravity',
-                'description': 'Two astronauts are stranded in space after their shuttle is destroyed.',
+                'title': 'Gravedad',
+                'description': 'Dos astronautas quedan varados en el espacio despues de que su transbordador sea destruido y deben encontrar una manera de volver a la Tierra.',
                 'release_year': 2013,
                 'duration_minutes': 91,
-                'genre': 'Science Fiction',
+                'genre': 'Ciencia Ficcion',
                 'rating': 4.4,
             },
             {
-                'title': 'Arrival',
-                'description': 'A linguist works with the military to communicate with alien lifeforms.',
+                'title': 'La Llegada',
+                'description': 'Una linguista trabaja con el ejercito para comunicarse con formas de vida alienigenas que han llegado a la Tierra.',
                 'release_year': 2016,
                 'duration_minutes': 116,
-                'genre': 'Science Fiction',
+                'genre': 'Ciencia Ficcion',
                 'rating': 4.5,
             },
             {
-                'title': 'A Star Is Born',
-                'description': 'A musician helps a young singer find fame as their relationship deteriorates.',
+                'title': 'Nace una Estrella',
+                'description': 'Un musico ayuda a una joven cantante a encontrar la fama mientras su propia carrera se desmorona debido a problemas personales.',
                 'release_year': 2018,
                 'duration_minutes': 136,
                 'genre': 'Drama',
@@ -77,71 +79,117 @@ class Command(BaseCommand):
             },
             {
                 'title': 'Blade Runner 2049',
-                'description': 'A young blade runner\'s discovery of a long-buried secret leads him to track down former blade runner Rick Deckard.',
+                'description': 'El descubrimiento de un secreto largamente enterrado lleva a un nuevo blade runner a buscar al ex blade runner Rick Deckard.',
                 'release_year': 2017,
                 'duration_minutes': 164,
-                'genre': 'Science Fiction',
+                'genre': 'Ciencia Ficcion',
                 'rating': 4.6,
             },
             {
-                'title': 'The Martian',
-                'description': 'An astronaut is stranded on Mars and must find a way to survive.',
+                'title': 'Mision Rescate',
+                'description': 'Un astronauta queda varado en Marte y debe encontrar una manera de sobrevivir mientras el equipo en la Tierra intenta rescatarlo.',
                 'release_year': 2015,
                 'duration_minutes': 144,
-                'genre': 'Science Fiction',
+                'genre': 'Ciencia Ficcion',
                 'rating': 4.7,
             },
             {
-                'title': 'Shutter Island',
-                'description': 'A U.S. Marshal investigates a disappearance at a mental facility.',
+                'title': 'La Isla Siniestra',
+                'description': 'Un alguacil de los Estados Unidos investiga la desaparicion de una paciente en un hospital psiquiatrico ubicado en una isla remota.',
                 'release_year': 2010,
                 'duration_minutes': 138,
-                'genre': 'Thriller',
+                'genre': 'Suspenso',
                 'rating': 4.3,
             },
             {
                 'title': '1917',
-                'description': 'Two British soldiers must cross No Man\'s Land and deliver a message to save 1,600 lives.',
+                'description': 'Dos soldados britanicos deben cruzar la tierra de nadie y entregar un mensaje para salvar a 1.600 vidas durante la Primera Guerra Mundial.',
                 'release_year': 2019,
                 'duration_minutes': 119,
-                'genre': 'Action',
+                'genre': 'Accion',
                 'rating': 4.5,
             },
         ]
+
+        title_mapping = {
+            'Inception': 'El Origen',
+            'Interstellar': 'Interstellar',
+            'The Dark Knight': 'El Caballero de la Noche',
+            'Gravity': 'Gravedad',
+            'Arrival': 'La Llegada',
+            'A Star Is Born': 'Nace una Estrella',
+            'Blade Runner 2049': 'Blade Runner 2049',
+            'The Martian': 'Mision Rescate',
+            'Shutter Island': 'La Isla Siniestra',
+            '1917': '1917',
+        }
+
         for data in movies_data:
-            movie, created = Movie.objects.get_or_create(
-                title=data['title'],
-                defaults={
-                    'description': data['description'],
-                    'release_year': data['release_year'],
-                    'duration_minutes': data['duration_minutes'],
-                    'genre': genres[data['genre']],
-                    'rating': data['rating'],
-                }
-            )
-            if created:
-                self.stdout.write(f'Created movie: {movie.title}')
+            old_title = None
+            for eng, spa in title_mapping.items():
+                if data['title'] == spa:
+                    old_title = eng
+                    break
+
+            movie = Movie.objects.filter(title=data['title']).first()
+            if not movie and old_title:
+                movie = Movie.objects.filter(title=old_title).first()
+
+            if movie:
+                movie.title = data['title']
+                movie.description = data['description']
+                movie.release_year = data['release_year']
+                movie.duration_minutes = data['duration_minutes']
+                movie.rating = data['rating']
+                genre = Genre.objects.get(name=data['genre'])
+                movie.genre = genre
+                movie.save()
+                self.stdout.write(f'Pelicula actualizada: {movie.title}')
+            else:
+                genre = Genre.objects.get(name=data['genre'])
+                movie = Movie.objects.create(
+                    title=data['title'],
+                    description=data['description'],
+                    release_year=data['release_year'],
+                    duration_minutes=data['duration_minutes'],
+                    genre=genre,
+                    rating=data['rating'],
+                )
+                self.stdout.write(f'Pelicula creada: {movie.title}')
 
     def seed_recommendations(self):
         recommendations_data = [
-            {'movie_title': 'Inception', 'user': 'admin', 'score': 5, 'comment': 'Masterpiece of cinema'},
-            {'movie_title': 'Inception', 'user': 'editor_user', 'score': 4, 'comment': 'Great plot and visuals'},
-            {'movie_title': 'Interstellar', 'user': 'admin', 'score': 5, 'comment': 'Emotionally powerful'},
-            {'movie_title': 'The Dark Knight', 'user': 'editor_user', 'score': 5, 'comment': 'Best superhero movie ever'},
-            {'movie_title': 'Gravity', 'user': 'admin', 'score': 4, 'comment': 'Visual effects are stunning'},
-            {'movie_title': 'Arrival', 'user': 'editor_user', 'score': 4, 'comment': 'Intelligent sci-fi'},
-            {'movie_title': 'Blade Runner 2049', 'user': 'admin', 'score': 5, 'comment': 'Visually breathtaking'},
-            {'movie_title': '1917', 'user': 'editor_user', 'score': 5, 'comment': 'Incredible one-shot experience'},
+            {'movie_title': 'El Origen', 'user': 'admin', 'score': 5, 'comment': 'Obra maestra del cine'},
+            {'movie_title': 'El Origen', 'user': 'editor_user', 'score': 4, 'comment': 'Gran trama y efectos visuales'},
+            {'movie_title': 'Interstellar', 'user': 'admin', 'score': 5, 'comment': 'Emotivamente poderosa'},
+            {'movie_title': 'El Caballero de la Noche', 'user': 'editor_user', 'score': 5, 'comment': 'La mejor pelicula de superheroes'},
+            {'movie_title': 'Gravedad', 'user': 'admin', 'score': 4, 'comment': 'Efectos visuales impresionantes'},
+            {'movie_title': 'La Llegada', 'user': 'editor_user', 'score': 4, 'comment': 'Ciencia ficcion inteligente'},
+            {'movie_title': 'Blade Runner 2049', 'user': 'admin', 'score': 5, 'comment': 'Visualmente impresionante'},
+            {'movie_title': '1917', 'user': 'editor_user', 'score': 5, 'comment': 'Experiencia de plano secuencia increible'},
         ]
+
         for data in recommendations_data:
-            movie = Movie.objects.get(title=data['movie_title'])
-            rec, created = Recommendation.objects.get_or_create(
-                movie=movie,
-                user_name=data['user'],
-                defaults={
-                    'score': data['score'],
-                    'comment': data['comment'],
-                }
-            )
-            if created:
-                self.stdout.write(f'Created recommendation: {rec}')
+            movie = Movie.objects.filter(title=data['movie_title']).first()
+            if not movie:
+                for eng, spa in {
+                    'Inception': 'El Origen',
+                    'The Dark Knight': 'El Caballero de la Noche',
+                    'Gravity': 'Gravedad',
+                    'Arrival': 'La Llegada',
+                }.items():
+                    if data['movie_title'] == spa:
+                        movie = Movie.objects.filter(title=eng).first()
+                        break
+
+            if movie:
+                rec, created = Recommendation.objects.get_or_create(
+                    movie=movie,
+                    user_name=data['user'],
+                    defaults={
+                        'score': data['score'],
+                        'comment': data['comment'],
+                    }
+                )
+                if created:
+                    self.stdout.write(f'Recomendacion creada: {rec}')

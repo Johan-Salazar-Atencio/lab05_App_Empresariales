@@ -1,0 +1,44 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Eliminar Pelicula{% endblock %}
+
+{% block content %}
+<style>
+    .confirm-container {
+        max-width: 500px;
+        margin: 50px auto;
+        background-color: #1a1a1a;
+        border: 1px solid #333333;
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+    }
+    .confirm-container h2 {
+        color: #dc3545;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+    }
+    .confirm-container p {
+        color: #CCCCCC;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+    .confirm-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+</style>
+
+<div class="confirm-container">
+    <h2>Eliminar Pelicula</h2>
+    <p>Estas seguro de que deseas eliminar <strong>{{ movie.title }}</strong>?<br>Esta accion no se puede deshacer.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="confirm-actions">
+            <button type="submit" class="btn btn-danger">Si, Eliminar</button>
+            <a href="{% url 'movies:movie_detail' movie.pk %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

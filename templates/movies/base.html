@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Movie App{% endblock %} - Lab05</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #121212;
+            color: #FFFFFF;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: #141414;
+            border-bottom: 2px solid #e50914;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e50914;
+            text-decoration: none;
+        }
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .navbar .nav-links a {
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .navbar .nav-links a:hover {
+            color: #e50914;
+        }
+        .navbar .search-box {
+            display: flex;
+            align-items: center;
+            background: #333333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .navbar .search-box input {
+            background: transparent;
+            border: none;
+            color: #FFFFFF;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            width: 200px;
+            outline: none;
+        }
+        .navbar .search-box button {
+            background: #e50914;
+            border: none;
+            color: #FFFFFF;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .navbar .search-box button:hover {
+            background: #f40612;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #e50914;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #f40612;
+        }
+        .btn-secondary {
+            background-color: #333333;
+        }
+        .btn-secondary:hover {
+            background-color: #444444;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .form-control {
+            width: 100%;
+            background: #333333;
+            border: 1px solid #555555;
+            color: #FFFFFF;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #e50914;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #CCCCCC;
+        }
+        footer {
+            background-color: #000000;
+            text-align: center;
+            padding: 15px;
+            color: #666666;
+            font-size: 0.85rem;
+        }
+        footer span {
+            color: #e50914;
+        }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{% url 'movies:movie_list' %}" class="logo">&#127916; Movie App</a>
+        <div class="nav-links">
+            <form method="get" action="{% url 'movies:movie_list' %}" class="search-box">
+                <input type="text" name="q" placeholder="Buscar peliculas..." value="{{ query|default:'' }}">
+                <button type="submit">&#128269;</button>
+            </form>
+            <a href="{% url 'movies:movie_create' %}" class="btn">+ Nueva Pelicula</a>
+            <a href="/admin/">Admin</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <p>Made with <span>&#9829;</span> | Laboratorio 05 - Desarrollo de Aplicaciones Empresariales</p>
+    </footer>
+</body>
+</html>
