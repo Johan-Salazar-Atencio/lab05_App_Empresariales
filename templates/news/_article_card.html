@@ -1,0 +1,13 @@
+<div class="article-card">
+    {% if article.image %}
+    <img src="{{ article.image.url }}" alt="{{ article.title }}">
+    {% endif %}
+    <div class="card-body">
+        <h3 class="card-title">{{ article.title }}</h3>
+        <p class="card-summary">{{ article.summary|truncatewords:20 }}</p>
+        <div class="card-meta">
+            <span class="card-author">{{ article.author.name }}</span>
+            <span>{{ article.published_at|date:"d/m/Y" }}</span>
+        </div>
+    </div>
+</div>

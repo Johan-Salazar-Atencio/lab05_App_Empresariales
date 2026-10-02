@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portal de Noticias{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-inner">
+            <a href="/" class="logo">&#128240; Portal de Noticias</a>
+            <nav class="nav-links">
+                <a href="/">Inicio</a>
+                <a href="/news/">Noticias</a>
+                <a href="/admin/">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <aside class="sidebar">
+            {% block sidebar %}{% endblock %}
+        </aside>
+    </div>
+
+    <footer class="footer">
+        <p>Laboratorio 06 - Motor de Plantillas Django | Desarrollo de Aplicaciones Empresariales</p>
+    </footer>
+</body>
+</html>
