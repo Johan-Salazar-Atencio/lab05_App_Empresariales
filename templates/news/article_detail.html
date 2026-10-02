@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="article-detail">
+    <h1>{{ article.title }}</h1>
+
+    <div class="article-meta">
+        <span>Por: {{ article.author.name }}</span> |
+        <span>Publicado: {{ article.published_at|date:"d/m/Y H:i" }}</span>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        {% for cat in article.categories.all %}
+        <a href="{% url 'news:category_articles' cat.pk %}" class="category-tag">{{ cat.name }}</a>
+        {% endfor %}
+    </div>
+
+    {% if article.image %}
+    <img src="{{ article.image.url }}" alt="{{ article.title }}" class="article-image">
+    {% endif %}
+
+    <p style="color: #e50914; font-size: 1.1rem; margin-bottom: 15px; font-style: italic;">
+        {{ article.summary|truncatewords:30 }}
+    </p>
+
+    <div class="article-body">
+        {{ article.body|linebreaks }}
+    </div>
+</div>
+
+<div style="margin-top: 20px;">
+    <a href="{% url 'news:index' %}" style="color: #e50914; text-decoration: none;">&larr; Volver a noticias</a>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<h3>Categorias</h3>
+<ul>
+    {% for cat in categories %}
+    <li><a href="{% url 'news:category_articles' cat.pk %}">{{ cat.name }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Noticias{% endblock %}
+
+{% block content %}
+<h2 style="color: #FFFFFF; margin-bottom: 20px;">Ultimas Noticias</h2>
+
+{% if articles %}
+<div class="article-grid">
+    {% for article in articles %}
+    <a href="{% url 'news:article_detail' article.pk %}" style="text-decoration: none; color: inherit;">
+        {% include 'news/_article_card.html' %}
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p style="color: #CCCCCC; text-align: center; padding: 40px;">No hay noticias disponibles.</p>
+{% endif %}
+{% endblock %}
+
+{% block sidebar %}
+<h3>Categorias</h3>
+<ul>
+    {% for cat in categories %}
+    <li><a href="{% url 'news:category_articles' cat.pk %}">{{ cat.name }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}
