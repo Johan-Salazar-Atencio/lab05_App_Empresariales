@@ -26,7 +26,15 @@
     </p>
 
     <div class="article-body">
-        {{ article.body|linebreaks }}
+        <h4 style="color: #e50914; margin-bottom: 10px;">Vista con escapado automatico ({{ "{{" }} article.body {{ "}" }}):</h4>
+        <div style="background: #222222; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #444444;">
+            {{ article.body }}
+        </div>
+
+        <h4 style="color: #e50914; margin-bottom: 10px;">Vista con filtro safe ({{ "{{" }} article.body|safe {{ "}" }}):</h4>
+        <div style="background: #222222; padding: 15px; border-radius: 6px; border: 1px solid #e50914;">
+            {{ article.body|safe }}
+        </div>
     </div>
 </div>
 
