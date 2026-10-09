@@ -1,8 +1,8 @@
-{% extends 'movies/base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}Catalogo{% endblock %}
+{% block title %}Catalogo de Peliculas{% endblock %}
 
-{% block extra_css %}
+{% block content %}
 <style>
     .page-header {
         display: flex;
@@ -29,10 +29,6 @@
         border-radius: 4px;
         font-size: 0.9rem;
         cursor: pointer;
-    }
-    .filter-bar select:focus {
-        outline: none;
-        border-color: #e50914;
     }
     .genre-section {
         margin-bottom: 40px;
@@ -109,20 +105,11 @@
         padding: 40px;
         font-size: 1.1rem;
     }
-    .clear-filter {
-        color: #e50914;
-        text-decoration: none;
-        font-size: 0.85rem;
-    }
-    .clear-filter:hover {
-        text-decoration: underline;
-    }
 </style>
-{% endblock %}
 
-{% block content %}
 <div class="page-header">
     <h2>Catalogo de Peliculas</h2>
+    <a href="/news/" class="btn">Ver Noticias</a>
 </div>
 
 <form method="get" action="{% url 'movies:movie_list' %}" class="filter-bar">
@@ -162,4 +149,13 @@
 {% empty %}
 <p class="no-movies">No se encontraron peliculas.</p>
 {% endfor %}
+{% endblock %}
+
+{% block sidebar %}
+<h3>Generos</h3>
+<ul>
+    {% for g in genres %}
+    <li><a href="{% url 'movies:movie_list' %}?genre={{ g.id }}">{{ g.name }}</a></li>
+    {% endfor %}
+</ul>
 {% endblock %}
